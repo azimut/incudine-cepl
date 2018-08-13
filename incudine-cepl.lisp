@@ -60,7 +60,9 @@
 (defun draw! ()
   "runs each drawing cycle"
   (when (funcall *step*)
-    (setf *tex*   (make-texture *c-arr*))
+    (cepl:free *tex*)
+;;    (cepl:free *s-tex*)
+    (setf *tex* (make-texture *c-arr*))
     (setf *s-tex* (cepl:sample *tex*)))
   (let ((res (surface-resolution (current-surface))))
     (setf (viewport-resolution (current-viewport))
