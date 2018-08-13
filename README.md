@@ -14,12 +14,13 @@ Put this repo on ~/quicklisp/local-projects/ along with incudine. And then on SL
 
 ```
 > (ql:quickload :incudine-cepl)
-> (in-package :incudine-cepl
+> (in-package :incudine-cepl)
 ```
 
 Start things in this order.
 ```
 > (runplay :start)
+> (rt-start)
 > (monitor-master :id 99)
 > (test-dsp :id 10)
 > (incudine:free (node 10))
