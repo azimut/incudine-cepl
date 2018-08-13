@@ -1,0 +1,7 @@
+# Ignore emacs file
+*~
+[#]*[#]
+.\#*
+
+# lisp
+*.fasl
