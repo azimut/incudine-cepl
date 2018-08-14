@@ -58,16 +58,13 @@
   (unless *c-arr*
     (setf *c-arr* (make-c-array nil :dimensions 512
                                 :element-type :float))
-    (setf *tex* (make-texture *c-arr*))
+    (setf *tex*   (make-texture *c-arr*))
     (setf *s-tex* (cepl:sample *tex*))))
 
 (defun draw! ()
   "runs each drawing cycle"
   (when (funcall *step*)
-    (cepl:free *tex*)
-;;    (cepl:free *s-tex*)
-    (setf *tex* (make-texture *c-arr*))
-    (setf *s-tex* (cepl:sample *tex*)))
+    (push-g *c-arr* (texref *tex*)))
   (let ((res (surface-resolution (current-surface))))
     (setf (viewport-resolution (current-viewport))
           res)
