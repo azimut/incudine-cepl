@@ -9,12 +9,13 @@
 (defvar *bs*    nil)
 
 ;; Hardcoded lenght of the external array set to 512
-(dsp! monitor-master ((index fixnum))
+(dsp! monitor-master ((index non-negative-fixnum))
   (:defaults 0)
   (setf (aref-c *c-arr* index)
         (coerce (audio-out 0) 'single-float))
   (setf index
-        (mod (1+ index) 512)))
+        (the non-negative-fixnum
+             (mod (+ 1 index) 512))))
 
 (dsp! test-dsp (freq amp)
   (:defaults 440 .1)
@@ -31,13 +32,16 @@
 
 ;; Fragment shader
 (defun-g frag
-    ((uv :vec2) &uniform (texture :sampler-1d) (time :float))
+    ((uv :vec2) &uniform
+     (texture :sampler-1d) (time :float))
   (let* ((tx (* 1 (x uv)))
          (wave (texture texture tx))
          (offset .5)
-;;         (offset (abs (sin time)))
+         ;;(offset (abs (sin time)))
+         ;;(smooth (* .1 (abs (sin time))))
+         (smooth .01)
          (wave (- 1 (smoothstep (v4! 0f0)
-                                (v4! (* .1 (abs (sin time))))
+                                (v4! smooth)
                                 (abs (- wave (- (y uv) offset)))))))
     wave))
 

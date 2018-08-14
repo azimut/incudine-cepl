@@ -8,6 +8,8 @@
                           #:buffer-data
                           #:buffer
                           #:sample)
+  (:import-from #:alexandria
+                #:non-negative-fixnum)
   (:import-from #:incudine.vug
                 #:define-vug
                 #:define-ugen
