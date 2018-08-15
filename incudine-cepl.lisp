@@ -51,9 +51,6 @@
 (defun initialize ()
   "runs once, can be called on repl to reset the state...
    by also removing the (unless)"
-  (when *car*
-    (free *tex*)
-    (free *car*))
   (unless *bs*
     (setf *bs*  (make-buffer-stream nil :primitive :points))
     (setf *car* (make-c-array nil :dimensions 512
