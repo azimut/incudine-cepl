@@ -2,20 +2,21 @@
 
 (in-package #:incudine-cepl)
 
-(defvar *step*  nil)
-(defvar *c-arr* nil)
-(defvar *tex*   nil)
-(defvar *s-tex* nil)
-(defvar *bs*    nil)
+;; We use this to control how ofter we update the wave image,
+;; technically not needed at all, but it might come handy to
+;; see the wave shape better.
+(defparameter *step* (make-stepper (seconds .05) (seconds .5)))
+
+(defvar *car* nil)
+(defvar *tex* nil)
+(defvar *sam* nil)
+(defvar *bs*  nil)
 
 ;; Hardcoded lenght of the external array set to 512
-(dsp! monitor-master ((index non-negative-fixnum))
-  (:defaults 0)
-  (setf (aref-c *c-arr* index)
-        (coerce (audio-out 0) 'single-float))
-  (setf index
-        (the non-negative-fixnum
-             (mod (+ 1 index) 512))))
+;; for some reason 511 looks beeter with (counter)
+(dsp! monitor-master ()
+  (setf (aref-c *car* (counter 0 511 :loop-p t))
+        (coerce (audio-out 0) 'single-float)))
 
 (dsp! test-dsp (freq amp)
   (:defaults 440 .1)
@@ -32,14 +33,13 @@
 
 ;; Fragment shader
 (defun-g frag
-    ((uv :vec2) &uniform
-     (texture :sampler-1d) (time :float))
+    ((uv :vec2) &uniform (texture :sampler-1d) (time :float))
   (let* ((tx (* 1 (x uv)))
          (wave (texture texture tx))
          (offset .5)
          ;;(offset (abs (sin time)))
-         ;;(smooth (* .1 (abs (sin time))))
          (smooth .01)
+         ;;(smooth (* .1 (abs (sin time))))
          (wave (- 1 (smoothstep (v4! 0f0)
                                 (v4! smooth)
                                 (abs (- wave (- (y uv) offset)))))))
@@ -51,27 +51,27 @@
 (defun initialize ()
   "runs once, can be called on repl to reset the state...
    by also removing the (unless)"
+  (when *car*
+    (free *tex*)
+    (free *car*))
   (unless *bs*
-    (setf *bs* (make-buffer-stream nil :primitive :points)))
-  (unless *step*
-    (setf *step* (make-stepper (seconds .05) (seconds 1))))
-  (unless *c-arr*
-    (setf *c-arr* (make-c-array nil :dimensions 512
+    (setf *bs*  (make-buffer-stream nil :primitive :points))
+    (setf *car* (make-c-array nil :dimensions 512
                                 :element-type :float))
-    (setf *tex*   (make-texture *c-arr*))
-    (setf *s-tex* (cepl:sample *tex*))))
+    (setf *tex* (make-texture *car*)
+          *sam* (cepl:sample *tex*))))
 
 (defun draw! ()
   "runs each drawing cycle"
   (when (funcall *step*)
-    (push-g *c-arr* (texref *tex*)))
+    (push-g *car* (texref *tex*)))
   (let ((res (surface-resolution (current-surface))))
     (setf (viewport-resolution (current-viewport))
           res)
     (as-frame
       (map-g #'pipe *bs*
              :time (* .001 (get-internal-real-time))
-             :texture *s-tex*))))
+             :texture *sam*))))
 
 (def-simple-main-loop runplay (:on-start #'initialize)
   (draw!))

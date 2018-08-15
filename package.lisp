@@ -17,6 +17,7 @@
                 #:frame-ref
                 #:delay1
                 #:cout
+                #:counter
                 #:vuglet
                 #:current-frame
               ;;  #:buffer-play
