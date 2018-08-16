@@ -46,6 +46,7 @@
                 #:lpf
                 #:hpf
                 #:buffer-read
+                #:buffer-write
                 #:butter-lp
                 #:fractal-noise
                 #:out

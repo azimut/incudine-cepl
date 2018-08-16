@@ -2,7 +2,7 @@
 
 ## Description
 
-This is (very) basic example of how to send wave data from [incudine](http://incudine.sourceforge.net/) to [CEPL](https://github.com/cbaggers/cepl).
+This is a (very) basic example of how to send wave data from [incudine](http://incudine.sourceforge.net/) to [CEPL](https://github.com/cbaggers/cepl).
 
 ## Demo
 
