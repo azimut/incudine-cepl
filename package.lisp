@@ -10,6 +10,15 @@
                           #:sample)
   (:import-from #:alexandria
                 #:non-negative-fixnum)
+  (:import-from #:incudine.analysis
+                #:fft
+                #:make-fft
+                #:new-fft-plan
+                #:fft-input
+                #:compute-fft
+                #:+FFT-PLAN-BEST+
+                #:+FFT-PLAN-FAST+
+                #:+FFT-PLAN-OPTIMAL+)  
   (:import-from #:incudine.vug
                 #:define-vug
                 #:define-ugen
@@ -20,7 +29,7 @@
                 #:counter
                 #:vuglet
                 #:current-frame
-              ;;  #:buffer-play
+                ;;#:buffer-play
                 #:foreach-channel
                 #:foreach-frame
                 #:pan2
@@ -32,7 +41,7 @@
                 #:midi-note-on-p
                 #:midi-note-off-p
                 #:midi-program-p
-                ;;                #:mouse-button
+                ;;#:mouse-button
                 #:with-control-period
                 #:white-noise
                 #:samphold
@@ -52,7 +61,7 @@
                 #:out
                 #:~
                 ;; nieveh!!!!
-                ;; #:rand
+                ;;#:rand
                 #:sine
                 #:pulse
                 #:line
@@ -64,7 +73,7 @@
                 #:db->lin
                 #:+twopi+
                 #:rt-eval
-              ;  #:barrier
+                ;;#:barrier
                 #:return-value-p
                 #:sample->fixnum
                 #:non-negative-sample

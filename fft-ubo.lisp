@@ -12,7 +12,8 @@
 ;; see the wave shape better.
 (defparameter *step* (make-stepper (seconds .05) (seconds 1)))
 
-(defparameter *buf* (make-buffer 512))
+(new-fft-plan 512 +FFT-PLAN-FAST+)
+(defvar *fft* (make-fft 512))
 
 ;; Hardcoded lenght of the external array set to 512
 ;; for some reason 511 looks beeter with (counter)
@@ -21,11 +22,11 @@
 (defvar *mar* nil)
 (defvar *ubo* nil)
 
-(dsp! monitor-master ((buf buffer))
-  (buffer-write
-   buf
-   (counter 0 511 :loop-p t)
-   (audio-out 0)))
+;; Arbitrary fixed period
+(dsp! monitor-master ((fft fft))
+  (setf (fft-input fft) (audio-out 0))
+  (with-control-period (5000)
+    (compute-fft fft)))
 
 ;; (monitor-master *buf* :id 100)
 ;; (test-dsp :id 2)
@@ -45,15 +46,16 @@
 ;; no need to define a vertex shader.
 
 (defstruct-g (music :layout :std-140)
-  (samples (:double 512)))
+  (ffts (:double 512)))
 
 ;; Fragment shader
+;; vec3 col = vec3( fft, 4.0*fft*(1.0-fft), 1.0-fft ) * fft;
 (defun-g frag
     ((uv :vec2) &uniform (sound music :ubo) (time :float))
-  (with-slots (samples) sound
-    (let* ((wave (float (aref samples (int (ceil (* 100 (x uv)))))))
-           (wave (- 1   (smoothstep 0f0 .01 (abs (- wave (- (y uv) .5)))))))
-      (v! wave 0 0 0))))
+  (with-slots (ffts) sound
+    (let* ((fft (float (aref ffts (int (ceil (* 100 (x uv)))))))
+           (fft (* (v! fft (* 4 fft (- 1 fft)) (- 1 fft)) fft)))
+      fft)))
 
 (defpipeline-g pipe (:points)
   :fragment (frag :vec2))
@@ -67,14 +69,13 @@
     (setf *ubo* (make-ubo *mar*))))
 
 (defun draw! ()
-  "runs each drawing cycle"
-  
+  "runs each drawing cycle"  
   (when (funcall *step*)
     ;; NOTE: ?
     (with-gpu-array-as-c-array (m (ubo-data *ubo*) :access-type :write-only)
       (incudine.external:foreign-copy-samples
        (c-array-pointer m)
-       (buffer-data *buf*)
+       (incudine.analysis::fft-output-buffer *fft*)
        512)))
   
   (let ((res (surface-resolution (current-surface))))
